@@ -1,0 +1,3 @@
+'use client';
+import Link from 'next/link';import {ShoppingCart,ArrowUpRight} from 'lucide-react';
+export default function BookCard({book,onAdd}){return <article className="book-card"><Link href={`/product/${book.id}`}><div className="cover" style={{background:book.color}}><span>{book.title}</span></div></Link><div className="book-info"><div className="meta">{book.category} · {book.condition}</div><h3>{book.title}</h3><div className="meta">{book.author}</div><div className="price-row"><span className="price">₹{book.price}</span><span className="pill">{book.store}</span></div><button className="btn" style={{width:'100%',marginTop:14}} onClick={()=>onAdd?.(book)}><ShoppingCart size={15}/> Add to cart <ArrowUpRight size={14}/></button></div></article>}
