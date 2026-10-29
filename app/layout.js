@@ -1,6 +1,7 @@
 import './globals.css';
 import { AntdRegistry } from '@ant-design/nextjs-registry';
 import { CartProvider } from '../components/CartProvider';
+import CursorTrail from '../components/CursorTrail';
 
 export const metadata = {
   title: 'KhajuriConnect — Books from local stores, connected to you.',
@@ -8,5 +9,5 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  return <html lang="en"><body><AntdRegistry><CartProvider>{children}</CartProvider></AntdRegistry></body></html>;
+  return <html lang="en"><body><AntdRegistry><CartProvider><CursorTrail />{children}</CartProvider></AntdRegistry></body></html>;
 }
