@@ -1,3 +1,202 @@
 'use client';
-import {useEffect,useMemo,useState} from 'react';import {useSearchParams} from 'next/navigation';import Nav from '../../components/Nav';import BookCard from '../../components/BookCard';import {books,categories} from '../../lib-data';
-export default function Shop(){const params=useSearchParams();const initial=params.get('q')||'';const cat=params.get('category')||'All';const [q,setQ]=useState(initial);const [active,setActive]=useState(cat);const [toast,setToast]=useState('');const [sort,setSort]=useState('recommended');const [sellerBooks,setSellerBooks]=useState([]);useEffect(()=>{try{setSellerBooks(JSON.parse(localStorage.getItem('khajuri-seller-inventory-v1')||'[]'))}catch{setSellerBooks([])}},[]);const allBooks=useMemo(()=>[...sellerBooks,...books],[sellerBooks]);const filtered=useMemo(()=>{const result=allBooks.filter(b=>(active==='All'||b.category===active)&&(!q||`${b.title} ${b.author} ${b.category} ${b.store}`.toLowerCase().includes(q.toLowerCase())));if(sort==='price-low')result.sort((a,b)=>a.price-b.price);if(sort==='price-high')result.sort((a,b)=>b.price-a.price);if(sort==='title')result.sort((a,b)=>a.title.localeCompare(b.title));return result},[q,active,sort,allBooks]);const add=b=>{setToast(`${b.title} added to your cart`);setTimeout(()=>setToast(''),2200)};return <><Nav/><main className="page"><div className="container"><div className="kicker">Khajuri marketplace</div><h1 className="page-title serif">Find your book.</h1><div className="small-search"><input value={q} onChange={e=>setQ(e.target.value)} placeholder="Search title, author, category or store"/><button>Search</button></div><div className="shop-layout"><aside className="filters"><strong>Browse</strong><button className={active==='All'?'active':''} onClick={()=>setActive('All')}>All books</button>{categories.map(([,n])=><button key={n} className={active===n?'active':''} onClick={()=>setActive(n)}>{n}</button>)}</aside><section><div className="section-head"><div><div className="kicker">Showing</div><p style={{margin:0}}>{filtered.length} sample listings · verify stock with sellers</p></div><label className="sort-control">Sort by <select value={sort} onChange={e=>setSort(e.target.value)}><option value="recommended">Recommended</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option><option value="title">Title A–Z</option></select></label></div><div className="book-grid">{filtered.map(b=><BookCard key={b.id} book={b} onAdd={add}/>)}</div></section></div></div></main>{toast&&<div className="toast">{toast}</div>}</>}
+
+import { Suspense, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import Nav from '../../components/Nav';
+import BookCard from '../../components/BookCard';
+import { books, categories } from '../../lib-data';
+
+function ShopContent() {
+  const params = useSearchParams();
+
+  const initial = params.get('q') || '';
+  const cat = params.get('category') || 'All';
+
+  const [q, setQ] = useState(initial);
+  const [active, setActive] = useState(cat);
+  const [toast, setToast] = useState('');
+  const [sort, setSort] = useState('recommended');
+  const [sellerBooks, setSellerBooks] = useState([]);
+
+  useEffect(() => {
+    try {
+      setSellerBooks(
+        JSON.parse(
+          localStorage.getItem('khajuri-seller-inventory-v1') || '[]'
+        )
+      );
+    } catch {
+      setSellerBooks([]);
+    }
+  }, []);
+
+  const allBooks = useMemo(
+    () => [...sellerBooks, ...books],
+    [sellerBooks]
+  );
+
+  const filtered = useMemo(() => {
+    const result = allBooks.filter(
+      (b) =>
+        (active === 'All' || b.category === active) &&
+        (!q ||
+          `${b.title} ${b.author} ${b.category} ${b.store}`
+            .toLowerCase()
+            .includes(q.toLowerCase()))
+    );
+
+    if (sort === 'price-low') {
+      result.sort((a, b) => a.price - b.price);
+    }
+
+    if (sort === 'price-high') {
+      result.sort((a, b) => b.price - a.price);
+    }
+
+    if (sort === 'title') {
+      result.sort((a, b) => a.title.localeCompare(b.title));
+    }
+
+    return result;
+  }, [q, active, sort, allBooks]);
+
+  const add = (b) => {
+    setToast(`${b.title} added to your cart`);
+
+    setTimeout(() => {
+      setToast('');
+    }, 2200);
+  };
+
+  return (
+    <>
+      <Nav />
+
+      <main className="page">
+        <div className="container">
+          <div className="kicker">Khajuri marketplace</div>
+
+          <h1 className="page-title serif">Find your book.</h1>
+
+          <div className="small-search">
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search title, author, category or store"
+              aria-label="Search books"
+            />
+
+            <button type="button">Search</button>
+          </div>
+
+          <div className="shop-layout">
+            <aside className="filters">
+              <strong>Browse</strong>
+
+              <button
+                type="button"
+                className={active === 'All' ? 'active' : ''}
+                onClick={() => setActive('All')}
+              >
+                All books
+              </button>
+
+              {categories.map(([, n]) => (
+                <button
+                  type="button"
+                  key={n}
+                  className={active === n ? 'active' : ''}
+                  onClick={() => setActive(n)}
+                >
+                  {n}
+                </button>
+              ))}
+            </aside>
+
+            <section>
+              <div className="section-head">
+                <div>
+                  <div className="kicker">Showing</div>
+
+                  <p style={{ margin: 0 }}>
+                    {filtered.length} sample listings · verify stock with
+                    sellers
+                  </p>
+                </div>
+
+                <label className="sort-control">
+                  Sort by{' '}
+
+                  <select
+                    value={sort}
+                    onChange={(e) => setSort(e.target.value)}
+                  >
+                    <option value="recommended">Recommended</option>
+                    <option value="price-low">Price: low to high</option>
+                    <option value="price-high">Price: high to low</option>
+                    <option value="title">Title A–Z</option>
+                  </select>
+                </label>
+              </div>
+
+              <div className="book-grid">
+                {filtered.map((b) => (
+                  <BookCard
+                    key={b.id}
+                    book={b}
+                    onAdd={add}
+                  />
+                ))}
+              </div>
+
+              {filtered.length === 0 && (
+                <div className="empty-state">
+                  <h2>No books found</h2>
+                  <p>
+                    Try another search or choose a different category.
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setQ('');
+                      setActive('All');
+                    }}
+                  >
+                    Show all books
+                  </button>
+                </div>
+              )}
+            </section>
+          </div>
+        </div>
+      </main>
+
+      {toast && (
+        <div className="toast" role="status" aria-live="polite">
+          {toast}
+        </div>
+      )}
+    </>
+  );
+}
+
+export default function Shop() {
+  return (
+    <Suspense
+      fallback={
+        <>
+          <Nav />
+
+          <main className="page">
+            <div className="container">
+              <p>Loading the Khajuri marketplace...</p>
+            </div>
+          </main>
+        </>
+      }
+    >
+      <ShopContent />
+    </Suspense>
+  );
+}
